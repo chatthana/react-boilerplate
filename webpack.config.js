@@ -1,6 +1,8 @@
 const webpack = require('webpack');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const UglifyJSWebpackPlugin = require('uglifyjs-webpack-plugin');
+const OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin');
 
 const HtmlManipulator = new HtmlWebpackPlugin({
   template: './src/index.html',
@@ -9,14 +11,25 @@ const HtmlManipulator = new HtmlWebpackPlugin({
 });
 
 module.exports = {
-  mode: 'production',
   entry: './src/index.js',
   output: {
     path: path.resolve(__dirname, 'build'),
-    filename: '[name].[contenthash].js'
+    filename: '[name].[hash].js'
   },
   devtool: 'inline-source-map',
+  devServer: {
+    historyApiFallback: true
+  },
   optimization: {
+    minimizer: [
+      new UglifyJSWebpackPlugin({
+        uglifyOptions: {
+          mangle: {
+            keep_fnames: true
+          }
+        }
+      })
+    ],
     splitChunks: {
       chunks: 'all'
     }
@@ -49,6 +62,7 @@ module.exports = {
   },
   plugins: [
     HtmlManipulator,
-    new webpack.HashedModuleIdsPlugin()
+    new webpack.HashedModuleIdsPlugin(),
+    new OptimizeCssAssetsWebpackPlugin()
   ]
 };
